@@ -31,7 +31,21 @@
             <v-btn class="indigo darken-4" dark v-on:click="saveExam()">Salvar Prova</v-btn>
           </v-flex>
           <v-flex md2 v-if="!timeOut && exam.status !== 2">
-            <v-btn class="green" dark v-on:click="endExam()">Finalizar Prova</v-btn>
+            <v-dialog v-model="dialog" persistent>
+              <v-btn class="green" dark v-on:click="endExam()" slot="activator">Finalizar Prova</v-btn>
+              <v-card>
+                <v-card-title class="headline">Parabéns você terminou a prova!</v-card-title>
+                <v-card-text>
+                  <v-icon large class="green--text text--darken-2">check circle</v-icon>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn class="green--text darken-1" flat="flat" :click="redirect('/avaliacoes')">Minhas Avaliações</v-btn>
+                  <v-btn class="green--text darken-1" flat="flat" :click="redirect('/home')">Menu</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+            
           </v-flex>
         </v-layout>
       </div>
@@ -59,7 +73,8 @@ export default {
       currentRealizedQuestion: '',
       exam: '',
       index: 1,
-      timeOut: false
+      timeOut: false,
+      modal: false
     }
   },
   beforeMount () {
@@ -131,6 +146,8 @@ export default {
       let exam = {answeredQuestions: this.realizedQuestions}
       baseService.put(`/exam/${id}`, exam).then(r => {
         console.log(r.data)
+      }).catch(e => {
+        this.$toastr('error', {position: 'toast-top-right', msg: 'Houve um erro ao finalizar a prova'})
       })
     },
     getIndex (index) {
@@ -138,6 +155,9 @@ export default {
     },
     getTimeOut (bool) {
       this.timeOut = bool
+    },
+    redirect (route) {
+      this.$router.push(route)
     }
   }
 }
